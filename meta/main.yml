@@ -1,0 +1,17 @@
+galaxy_info:
+  author: reneruprecht
+  description: Installs containerd
+  role_name: containerd
+
+  license: ""
+
+  min_ansible_version: "2.1"
+
+  platforms:
+    - name: Debian
+      versions:
+        - bookworm
+
+  galaxy_tags: []
+
+dependencies: []

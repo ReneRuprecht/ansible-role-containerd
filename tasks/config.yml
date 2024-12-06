@@ -1,0 +1,58 @@
+---
+- name: Check if config exists
+  ansible.builtin.stat:
+    path: "{{ containerd_tmp_config }}"
+  register: "containerd_tmp_config_stat"
+
+- name: Setup config
+  when: >
+    not containerd_tmp_config_stat.stat.exists or
+    'containerd_reconfigure' in ansible_run_tags
+  block:
+    - name: Generate default containerd configuration
+      ansible.builtin.command:
+        cmd: containerd config default
+      register: containerd_config_output
+      changed_when: false
+
+    - name: Write containerd config to file
+      ansible.builtin.copy:
+        dest: "{{ containerd_tmp_config }}"
+        content: "{{ containerd_config_output.stdout }}"
+        mode: "0644"
+      register: "containerd_config_created"
+
+    - name: Ensure SystemdCgroup is set to true in containerd config
+      ansible.builtin.lineinfile:
+        path: "{{ containerd_tmp_config }}"
+        regexp: '^\s*SystemdCgroup\s*='
+        line: '            SystemdCgroup = true'
+        insertafter: >
+          '^\[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options\]'
+
+    - name: Ensure SystemdCgroup = false is absent
+      ansible.builtin.lineinfile:
+        path: "{{ containerd_tmp_config }}"
+        state: absent
+        line: '    SystemdCgroup = false'
+      changed_when: false
+
+    - name: Ensure the correct sandbox image version is set
+      ansible.builtin.lineinfile:
+        path: "{{ containerd_tmp_config }}"
+        regexp: '^\s*sandbox_image\s*=\s*"registry.k8s.io/pause:.*"'
+        line: '  sandbox_image = "{{ containerd_kubernetes_pause_image }}"'
+
+- name: Copy config.toml
+  ansible.builtin.copy:
+    src: "{{ containerd_tmp_config }}"
+    dest: /etc/containerd/config.toml
+    mode: "0644"
+    remote_src: true
+  notify: Restart containerd
+
+- name: Ensure containerd is started and enabled
+  ansible.builtin.service:
+    name: containerd
+    state: "{{ containerd_service_state }}"
+    enabled: "{{ containerd_service_enabled }}"
