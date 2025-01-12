@@ -1,0 +1,9 @@
+---
+containerd_version: "1.7.24"
+containerd_kubernetes_pause_image: "registry.k8s.io/pause:3.10"
+
+containerd_package: containerd
+containerd_package_state: present
+
+containerd_service_state: started
+containerd_service_enabled: true

@@ -1,0 +1,21 @@
+---
+dependency:
+  name: galaxy
+
+driver:
+  name: vagrant
+  provider:
+    name: libvirt
+
+platforms:
+  - name: debian12-containerd
+    box: debian/bookworm64
+    provider_options:
+      memory: 1024
+      cpus: 2
+
+provisioner:
+  name: ansible
+
+verifier:
+  name: ansible

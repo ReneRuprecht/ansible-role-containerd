@@ -1,0 +1,32 @@
+---
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 600
+  when: ansible_os_family == 'Debian'
+
+- name: Install dependencies
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ containerd_dependency_packages }}"
+
+- name: Add Docker repository with deb822_repository
+  ansible.builtin.deb822_repository:
+    name: docker
+    types: deb
+    uris: "{{ containerd_docker_repo_url }}"
+    suites: "{{ ansible_distribution_release }}"
+    components: stable
+    architectures: "{{ ansible_architecture }}"
+    signed_by: "{{ containerd_docker_gpg_url }}"
+
+- name: Update apt
+  ansible.builtin.apt:
+    update_cache: true
+  when: ansible_os_family == 'Debian'
+
+- name: Ensure containerd is installed
+  ansible.builtin.package:
+    name: "{{ containerd_package }}"
+    state: "{{ containerd_package_state }}"

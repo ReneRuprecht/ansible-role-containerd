@@ -1,0 +1,16 @@
+---
+- name: Import vars
+  ansible.builtin.include_vars: debian.yml
+  when: ansible_os_family == 'Debian'
+
+- name: Configure system
+  ansible.builtin.import_tasks: system.yml
+
+- name: Install containerd
+  ansible.builtin.import_tasks: install.yml
+
+- name: Configure containerd
+  ansible.builtin.import_tasks: config.yml
+
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers

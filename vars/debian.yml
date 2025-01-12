@@ -1,0 +1,8 @@
+---
+containerd_dependency_packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+
+containerd_docker_repo_url: "https://download.docker.com/linux/debian"
+containerd_docker_gpg_url: "https://download.docker.com/linux/debian/gpg"

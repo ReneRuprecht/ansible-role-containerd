@@ -1,0 +1,31 @@
+---
+- name: Ensure required kernel modules are loaded
+  ansible.builtin.shell: |
+    modprobe overlay
+    modprobe br_netfilter
+  changed_when: false
+
+- name: Set ipv4 forward
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    state: present
+    value: '1'
+    reload: true
+
+- name: Disable swap at runtime
+  ansible.builtin.command:
+    cmd: swapoff -a
+  changed_when: false
+
+- name: Remove swap entry from /etc/fstab
+  ansible.builtin.lineinfile:
+    path: /etc/fstab
+    state: absent
+    regexp: '.*swap.*'
+
+- name: Ensure swap is disabled permanently
+  ansible.builtin.shell: |
+    grep -q 'swap' /proc/swaps || echo 'Swap is disabled'
+  register: swap_status
+  changed_when: false
+  failed_when: "'Swap is disabled' not in swap_status.stdout"
