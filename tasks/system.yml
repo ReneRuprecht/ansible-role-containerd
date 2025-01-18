@@ -1,8 +1,10 @@
 ---
 - name: Ensure required kernel modules are loaded
-  ansible.builtin.shell: |
-    modprobe overlay
-    modprobe br_netfilter
+  ansible.builtin.command:
+    cmd: "{{ item }}"
+  with_items:
+    - modprobe overlay
+    - modprobe br_netfilter
   changed_when: false
 
 - name: Set ipv4 forward
