@@ -3,9 +3,6 @@
   ansible.builtin.include_vars: debian.yml
   when: ansible_os_family == 'Debian'
 
-- name: Configure system
-  ansible.builtin.import_tasks: system.yml
-
 - name: Install containerd
   ansible.builtin.import_tasks: install.yml
 
